@@ -6,6 +6,7 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
+{-# LANGUAGE BangPatterns        #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
 
@@ -41,17 +42,19 @@ import Control.Applicative
 import Control.Monad hiding (mapM_)
 import Data.Either
 import qualified Data.Foldable as F
+import Data.Functor.Compose (Compose(..))
+import Data.Functor.Const (Const(..))
+import Data.Functor.Identity (Identity(..))
+import Data.Functor.Product as Product
+import Data.Functor.Sum as Sum
+import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 import Data.Monoid
 import Data.Ord
-import Data.Semigroup (Max(..), Min(..), Option(..))
+import Data.Semigroup (Max(..), Min(..), Option(..), (<>))
 import GHC.Base (build)
 
-import Data.Functor.Const (Const(..))
-import Data.Functor.Identity (Identity(..))
-import Data.List.NonEmpty (NonEmpty(..))
-
-import Data.Constrained (Constrained(..), NoConstraints)
+import Data.Constrained (Constrained(..))
 
 -- | Like 'Functor' but allows elements to have constraints on them.
 -- Laws are the same:
@@ -64,6 +67,7 @@ class Constrained f => CFoldable f where
   -- | Combine the elements of a structure using a monoid.
   cfold :: (Monoid m, Constraints f m) => f m -> m
   cfold = cfoldMap id
+  {-# INLINABLE cfold #-}
 
   -- | Map each element of the structure to a monoid,
   -- and combine the results.
@@ -203,6 +207,7 @@ class Constrained f => CFoldable f where
     = maybe (errorWithoutStackTrace "maximum: empty structure") getMax
     . getOption
     . cfoldMap (Option . Just . Max)
+  {-# INLINABLE cmaximum #-}
 
   -- | The least element of a non-empty structure.
   cminimum :: forall a. (Ord a, Constraints f a) => f a -> a
@@ -210,15 +215,18 @@ class Constrained f => CFoldable f where
     = maybe (errorWithoutStackTrace "maximum: empty structure") getMin
     . getOption
     . cfoldMap (Option . Just . Min)
+  {-# INLINABLE cminimum #-}
 
   -- | The 'sum' function computes the sum of the numbers of a structure.
   csum :: (Num a, Constraints f a) => f a -> a
   csum = getSum . cfoldMap Sum
+  {-# INLINABLE csum #-}
 
   -- | The 'product' function computes the product of the numbers of a
   -- structure.
   cproduct :: (Num a, Constraints f a) => f a -> a
   cproduct = getProduct . cfoldMap Product
+  {-# INLINABLE cproduct #-}
 
 
 -- | Monadic fold over the elements of a structure,
@@ -626,3 +634,58 @@ instance CFoldable (Const a) where
   csum     = F.sum
   cproduct = F.product
 
+instance (CFoldable f, CFoldable g) => CFoldable (Compose f g) where
+  {-# INLINABLE cfold    #-}
+  {-# INLINABLE cfoldMap #-}
+  {-# INLINABLE cfoldr   #-}
+  cfold      = cfoldMap cfold . getCompose
+  cfoldMap f = cfoldMap (cfoldMap f) . getCompose
+  cfoldr f z = cfoldr (\ga acc -> cfoldr f acc ga) z . getCompose
+
+instance (CFoldable f, CFoldable g) => CFoldable (Product.Product f g) where
+  {-# INLINABLE cfold    #-}
+  {-# INLINABLE cfoldMap #-}
+  {-# INLINABLE cfoldr   #-}
+  {-# INLINABLE cfoldr'  #-}
+  {-# INLINABLE cfoldl   #-}
+  {-# INLINABLE cfoldl'  #-}
+  {-# INLINABLE cfoldr1  #-}
+  {-# INLINABLE cfoldl1  #-}
+  cfold       (Pair x y) = cfold x <> cfold y
+  cfoldMap f  (Pair x y) = cfoldMap f x <> cfoldMap f y
+  cfoldr f z  (Pair x y) = cfoldr f (cfoldr f z y) x
+  cfoldr' f z (Pair x y) = cfoldr' f y' x
+    where
+      !y' = cfoldr' f z y
+  cfoldl f z  (Pair x y) = cfoldl f (cfoldl f z y) x
+  cfoldl' f z (Pair x y) = cfoldl' f x' x
+    where
+      !x' = cfoldl' f z y
+  cfoldr1 f   (Pair x y) = cfoldl1 f x `f` cfoldl1 f y
+  cfoldl1 f   (Pair x y) = cfoldr1 f y `f` cfoldr1 f x
+
+instance (CFoldable f, CFoldable g) => CFoldable (Sum.Sum f g) where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  cfold       (InL x) = cfold x
+  cfold       (InR y) = cfold y
+  cfoldMap f  (InL x) = cfoldMap f x
+  cfoldMap f  (InR y) = cfoldMap f y
+  cfoldr f z  (InL x) = cfoldr f z x
+  cfoldr f z  (InR y) = cfoldr f z y
+  cfoldr' f z (InL x) = cfoldr' f z x
+  cfoldr' f z (InR y) = cfoldr' f z y
+  cfoldl f z  (InL x) = cfoldl f z x
+  cfoldl f z  (InR y) = cfoldl f z y
+  cfoldl' f z (InL x) = cfoldl' f z x
+  cfoldl' f z (InR y) = cfoldl' f z y
+  cfoldr1 f   (InL x) = cfoldr1 f x
+  cfoldr1 f   (InR y) = cfoldr1 f y
+  cfoldl1 f   (InL x) = cfoldl1 f x
+  cfoldl1 f   (InR y) = cfoldl1 f y

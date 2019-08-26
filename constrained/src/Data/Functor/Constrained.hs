@@ -14,8 +14,11 @@ module Data.Functor.Constrained
   , module Data.Constrained
   ) where
 
+import Data.Functor.Compose (Compose(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
+import Data.Functor.Product (Product(..))
+import Data.Functor.Sum (Sum(..))
 import Data.List.NonEmpty (NonEmpty(..))
 
 import Data.Constrained (Constrained(..), NoConstraints)
@@ -67,3 +70,16 @@ instance CFunctor (Either a) where
 instance CFunctor (Const a) where
   {-# INLINE cmap_ #-}
   cmap_ = (<$)
+
+instance (CFunctor f, CFunctor g) => CFunctor (Compose f g) where
+  {-# INLINE cmap #-}
+  cmap f (Compose x) = Compose (cmap (cmap f) x)
+
+instance (CFunctor f, CFunctor g) => CFunctor (Product f g) where
+  {-# INLINE cmap #-}
+  cmap f (Pair x y) = Pair (cmap f x) (cmap f y)
+
+instance (CFunctor f, CFunctor g) => CFunctor (Sum f g) where
+  {-# INLINE cmap #-}
+  cmap f (InL x) = InL (cmap f x)
+  cmap f (InR y) = InR (cmap f y)

@@ -8,22 +8,29 @@
 
 {-# LANGUAGE ConstraintKinds        #-}
 {-# LANGUAGE DefaultSignatures      #-}
+{-# LANGUAGE FlexibleContexts       #-}
+{-# LANGUAGE FlexibleInstances      #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE KindSignatures         #-}
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE TypeFamilies           #-}
+{-# LANGUAGE UndecidableInstances   #-}
 
 module Data.Traversable.Constrained
   ( CTraversable(..)
+  , cfor
   , module Data.Constrained
   ) where
 
+import Data.Functor.Compose (Compose(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
+import Data.Functor.Product as Product
+import Data.Functor.Sum (Sum(..))
 import Data.Kind
 import Data.List.NonEmpty (NonEmpty(..))
 
-import Data.Constrained (Constrained(..), NoConstraints)
+import Data.Constrained (Constrained(..))
 import Data.Foldable.Constrained
 import Data.Functor.Constrained
 
@@ -85,3 +92,22 @@ instance CTraversable Applicative (Either a) where
 instance CTraversable Applicative (Const a) where
   {-# INLINE csequence #-}
   csequence = sequenceA
+
+instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Compose f g) where
+  {-# INLINABLE ctraverse #-}
+  ctraverse f = fmap Compose . ctraverse (ctraverse f) . getCompose
+
+instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Product f g) where
+  {-# INLINABLE ctraverse #-}
+  ctraverse f (Pair x y) = Pair <$> ctraverse f x <*> ctraverse f y
+
+instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Sum f g) where
+  {-# INLINABLE ctraverse #-}
+  ctraverse f (InL x) = InL <$> ctraverse f x
+  ctraverse f (InR y) = InR <$> ctraverse f y
+
+{-# INLINE cfor #-}
+cfor
+  :: (CTraversable c f, Constraints f a, Constraints f b, c m)
+  => f a -> (a -> m b) -> m (f b)
+cfor = flip ctraverse
