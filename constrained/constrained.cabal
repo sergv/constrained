@@ -1,3 +1,5 @@
+cabal-version:
+  2.0
 name:
   constrained
 version:
@@ -20,8 +22,6 @@ author:
 maintainer:
   Sergey Vinokurov <sergey@debian>
 
-cabal-version:
-  2.0
 build-type:
   Simple
 

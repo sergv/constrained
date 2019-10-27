@@ -1,11 +1,13 @@
+cabal-version:
+  2.0
 name:
   constrained-platform-instances
 version:
   0.1
 synopsis:
-  TODO
+  Instances of standard platform types for 'constrained' package.
 description:
-  TODO
+  Instances for 'IntMap', 'Map', 'Vector', etc.
 license:
   BSD2
 license-file:
@@ -15,8 +17,6 @@ author:
 maintainer:
   Sergey Vinokurov <sergey@debian>
 
-cabal-version:
-  2.0
 build-type:
   Simple
 
