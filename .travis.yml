@@ -1,0 +1,49 @@
+sudo: true
+language: haskell
+
+git:
+  depth: 5
+
+cabal: "3.0"
+
+cache:
+  directories:
+  - "$HOME/.cabal/store"
+
+matrix:
+  include:
+  # Cabal
+  - ghc: 8.2.2
+  - ghc: 8.4.4
+  - ghc: 8.6.5
+  - ghc: 8.8.1
+
+install:
+  - ghc --version
+  - cabal --version
+  - cabal update
+  - DISTDIR=$(mktemp -d /tmp/dist.XXXX)
+
+script:
+  # test that source-distributions can be generated
+  - cabal sdist all
+  - cat ./dist*/sdist/constrained-0.1.tar.gz | (cd "${DISTDIR}" && tar -xzvf -)
+  - cat ./dist*/sdist/constrained-platform-instances-0.1.tar.gz | (cd "${DISTDIR}" && tar -xzvf -)
+  - cd ${DISTDIR}/
+  - |
+    printf 'packages: constrained-0.1/constrained.cabal constrained-platform-instances-0.1/constrained-platform-instances.cabal\n' > cabal.project
+
+  - PKGDIR="$(pwd)"
+  - ls -l
+  - ls -l *
+
+  # Build the package
+  - echo "Building package"
+  - cabal configure --enable-tests --enable-benchmarks
+  - cabal build all
+  - (cd constrained-0.1; cabal check)
+  - (cd constrained-platform-instances-0.1; cabal check)
+  - cabal haddock all
+
+notifications:
+  email: false
