@@ -36,14 +36,13 @@ module Data.Foldable.Constrained
   ) where
 
 import Prelude
-  (Bool(..), id, (.), Int, Eq(..), Ord(..), Num(..), ($), ($!), flip, errorWithoutStackTrace, not)
+  (Bool(..), id, (.), Int, Eq(..), Num(..), ($), ($!), flip, errorWithoutStackTrace, not)
 
 import Control.Applicative
 import Control.Monad hiding (mapM_)
 import Data.Either
 import qualified Data.Foldable as F
 import Data.Functor.Compose (Compose(..))
-import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Functor.Product as Product
 import Data.Functor.Sum as Sum
@@ -51,7 +50,7 @@ import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 import Data.Monoid
 import Data.Ord
-import Data.Semigroup (Max(..), Min(..), Option(..), (<>))
+import Data.Semigroup (Max(..), Min(..), Option(..))
 import GHC.Base (build)
 
 import Data.Constrained (Constrained(..))

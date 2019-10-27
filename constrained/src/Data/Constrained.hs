@@ -33,6 +33,8 @@ import Data.List.NonEmpty (NonEmpty(..))
 class Constrained (f :: k2 -> k1) where
   type Constraints (f :: k2 -> k1) :: k2 -> Constraint
 
+-- | Used to specify values for 'Constraints' type family to indicate
+-- absence of any constraints (i.e. empty 'Constraint').
 class NoConstraints (a :: k)
 instance NoConstraints a
 
