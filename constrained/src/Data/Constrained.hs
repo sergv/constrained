@@ -18,6 +18,8 @@
 module Data.Constrained
   ( Constrained(..)
   , NoConstraints
+  , UnionConstraints
+  , ComposeConstraints
   ) where
 
 import Control.Applicative (ZipList(..))
@@ -31,9 +33,15 @@ import Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Monoid as Monoid
 import qualified Data.Semigroup as Semigroup
 
--- | NB 'Constraints' is associated with a typeclass in order to
--- improve inference. Whenever a typeclass constraint will be present, instance
--- is guaranteed to exist and typechecker is going to take advantage of that.
+-- | Specification of constrains that a functor might impose on its elements.
+-- For example, sets typically require that their elements are ordered and
+-- unboxed vectors require elements to have an instance of special class
+-- that allows them to be packed in memory.
+--
+-- NB The 'Constraints' type family is associated with a typeclass in
+-- order to improve type inference. Whenever a typeclass constraint
+-- will be present, instance is guaranteed to exist and typechecker is
+-- going to take advantage of that.
 class Constrained (f :: k2 -> k1) where
   type Constraints (f :: k2 -> k1) :: k2 -> Constraint
 
@@ -42,9 +50,12 @@ class Constrained (f :: k2 -> k1) where
 class NoConstraints (a :: k)
 instance NoConstraints a
 
+-- | Combine constraints of two functors together to form a bigger set
+-- of constraints.
 class (Constraints f a, Constraints g a) => UnionConstraints (f :: k1 -> k2) (g :: k1 -> k2) (a :: k1)
 instance (Constraints f a, Constraints g a) => UnionConstraints f g a
 
+-- | Combine constraints for a case when one functors contains the other one.
 class (Constraints f (g a), Constraints g a) => ComposeConstraints (f :: k2 -> k1) (g :: k3 -> k2) (a :: k3)
 instance (Constraints f (g a), Constraints g a) => ComposeConstraints f g a
 

@@ -61,11 +61,8 @@ import GHC.Base (build)
 
 import Data.Constrained (Constrained(..))
 
--- | Like 'Functor' but allows elements to have constraints on them.
--- Laws are the same:
---
--- > cmap id      == id
--- > cmap (f . g) == cmap f . cmap g
+-- | Like 'Data.Foldable.Foldable' but allows elements to have constraints on them.
+-- Laws are the same.
 class Constrained f => CFoldable f where
   {-# MINIMAL cfoldMap | cfoldr #-}
 
@@ -83,20 +80,20 @@ class Constrained f => CFoldable f where
 
   -- | Right-associative fold of a structure.
   --
-  -- In the case of lists, 'foldr', when applied to a binary operator, a
+  -- In the case of lists, 'cfoldr', when applied to a binary operator, a
   -- starting value (typically the right-identity of the operator), and a
   -- list, reduces the list using the binary operator, from right to left:
   --
-  -- > foldr f z [x1, x2, ..., xn] == x1 `f` (x2 `f` ... (xn `f` z)...)
+  -- > cfoldr f z [x1, x2, ..., xn] == x1 `f` (x2 `f` ... (xn `f` z)...)
   --
   -- Note that, since the head of the resulting expression is produced by
   -- an application of the operator to the first element of the list,
-  -- 'foldr' can produce a terminating expression from an infinite list.
+  -- 'cfoldr' can produce a terminating expression from an infinite list.
   --
-  -- For a general 'Foldable' structure this should be semantically identical
+  -- For a general 'CFoldable' structure this should be semantically identical
   -- to,
   --
-  -- @foldr f z = 'List.foldr' f z . 'toList'@
+  -- @cfoldr f z = 'List.foldr' f z . 'ctoList'@
   --
   cfoldr :: Constraints f a => (a -> b -> b) -> b -> f a -> b
   cfoldr f z t = appEndo (cfoldMap (Endo . f) t) z
@@ -111,28 +108,28 @@ class Constrained f => CFoldable f where
 
   -- | Left-associative fold of a structure.
   --
-  -- In the case of lists, 'foldl', when applied to a binary
+  -- In the case of lists, 'cfoldl', when applied to a binary
   -- operator, a starting value (typically the left-identity of the operator),
   -- and a list, reduces the list using the binary operator, from left to
   -- right:
   --
-  -- > foldl f z [x1, x2, ..., xn] == (...((z `f` x1) `f` x2) `f`...) `f` xn
+  -- > cfoldl f z [x1, x2, ..., xn] == (...((z `f` x1) `f` x2) `f`...) `f` xn
   --
   -- Note that to produce the outermost application of the operator the
-  -- entire input list must be traversed. This means that 'foldl'' will
+  -- entire input list must be traversed. This means that 'cfoldl'' will
   -- diverge if given an infinite list.
   --
   -- Also note that if you want an efficient left-fold, you probably want to
-  -- use 'foldl'' instead of 'foldl'. The reason for this is that latter does
+  -- use 'cfoldl'' instead of 'cfoldl'. The reason for this is that latter does
   -- not force the "inner" results (e.g. @z `f` x1@ in the above example)
   -- before applying them to the operator (e.g. to @(`f` x2)@). This results
   -- in a thunk chain @O(n)@ elements long, which then must be evaluated from
   -- the outside-in.
   --
-  -- For a general 'Foldable' structure this should be semantically identical
+  -- For a general 'CFoldable' structure this should be semantically identical
   -- to,
   --
-  -- @foldl f z = 'List.foldl' f z . 'toList'@
+  -- @cfoldl f z = 'List.foldl' f z . 'ctoList'@
   --
   cfoldl :: Constraints f a => (b -> a -> b) -> b -> f a -> b
   cfoldl f z t = appEndo (getDual (cfoldMap (Dual . Endo . flip f) t)) z
@@ -145,22 +142,22 @@ class Constrained f => CFoldable f where
   -- This ensures that each step of the fold is forced to weak head normal
   -- form before being applied, avoiding the collection of thunks that would
   -- otherwise occur. This is often what you want to strictly reduce a finite
-  -- list to a single, monolithic result (e.g. 'length').
+  -- list to a single, monolithic result (e.g. 'clength').
   --
-  -- For a general 'Foldable' structure this should be semantically identical
+  -- For a general 'CFoldable' structure this should be semantically identical
   -- to,
   --
-  -- @foldl f z = 'List.foldl'' f z . 'toList'@
+  -- @cfoldl f z = 'List.foldl'' f z . 'ctoList'@
   --
   cfoldl' :: Constraints f a => (b -> a -> b) -> b -> f a -> b
   cfoldl' f z0 xs = cfoldr f' id xs z0
     where
       f' x k z = k $! f z x
 
-  -- | A variant of 'foldr' that has no base case,
+  -- | A variant of 'cfoldr' that has no base case,
   -- and thus may only be applied to non-empty structures.
   --
-  -- @'foldr1' f = 'List.foldr1' f . 'toList'@
+  -- @'cfoldr1' f = 'List.foldr1' f . 'ctoList'@
   cfoldr1 :: Constraints f a => (a -> a -> a) -> f a -> a
   cfoldr1 f xs =
     fromMaybe (errorWithoutStackTrace "foldr1: empty structure")
@@ -170,10 +167,10 @@ class Constrained f => CFoldable f where
         Nothing -> x
         Just y  -> f x y
 
-  -- | A variant of 'foldl' that has no base case,
+  -- | A variant of 'cfoldl' that has no base case,
   -- and thus may only be applied to non-empty structures.
   --
-  -- @'foldl1' f = 'List.foldl1' f . 'toList'@
+  -- @'cfoldl1' f = 'List.foldl1' f . 'ctoList'@
   cfoldl1 :: Constraints f a => (a -> a -> a) -> f a -> a
   cfoldl1 f xs =
     fromMaybe (errorWithoutStackTrace "foldl1: empty structure")
@@ -222,12 +219,12 @@ class Constrained f => CFoldable f where
     . cfoldMap (Option . Just . Min)
   {-# INLINABLE cminimum #-}
 
-  -- | The 'sum' function computes the sum of the numbers of a structure.
+  -- | The 'csum' function computes the sum of the numbers of a structure.
   csum :: (Num a, Constraints f a) => f a -> a
   csum = getSum . cfoldMap Sum
   {-# INLINABLE csum #-}
 
-  -- | The 'product' function computes the product of the numbers of a
+  -- | The 'cproduct' function computes the product of the numbers of a
   -- structure.
   cproduct :: (Num a, Constraints f a) => f a -> a
   cproduct = getProduct . cfoldMap Product
@@ -254,8 +251,8 @@ cfoldlM f z0 xs = cfoldr f' return xs z0
 ctraverse_ :: (CFoldable f, Applicative f, Constraints f a) => (a -> f b) -> f a -> f ()
 ctraverse_ f = cfoldr ((*>) . f) (pure ())
 
--- | 'for_' is 'traverse_' with its arguments flipped. For a version
--- that doesn't ignore the results see 'Data.Traversable.for'.
+-- | 'cfor_' is 'ctraverse_' with its arguments flipped. For a version
+-- that doesn't ignore the results see 'Data.Traversable.Constrained.cfor'.
 --
 -- >>> for_ [1..4] print
 -- 1
@@ -270,16 +267,11 @@ cfor_ = flip ctraverse_
 -- these actions from left to right, and ignore the results. For a
 -- version that doesn't ignore the results see
 -- 'Data.Traversable.mapM'.
---
--- As of base 4.8.0.0, 'mapM_' is just 'traverse_', specialized to
--- 'Monad'.
 cmapM_ :: (CFoldable f, Monad m, Constraints f a) => (a -> m b) -> f a -> m ()
 cmapM_ f = cfoldr ((>>) . f) (return ())
 
--- | 'forM_' is 'mapM_' with its arguments flipped. For a version that
+-- | 'cforM_' is 'cmapM_' with its arguments flipped. For a version that
 -- doesn't ignore the results see 'Data.Traversable.forM'.
---
--- As of base 4.8.0.0, 'forM_' is just 'for_', specialized to 'Monad'.
 cforM_ :: (CFoldable f, Monad m, Constraints f a) => f a -> (a -> m b) -> m ()
 {-# INLINE cforM_ #-}
 cforM_ = flip cmapM_
@@ -293,13 +285,10 @@ csequenceA_ = cfoldr (*>) (pure ())
 -- | Evaluate each monadic action in the structure from left to right,
 -- and ignore the results. For a version that doesn't ignore the
 -- results see 'Data.Traversable.sequence'.
---
--- As of base 4.8.0.0, 'sequence_' is just 'sequenceA_', specialized
--- to 'Monad'.
 csequence_ :: (CFoldable f, Monad m, Constraints f a, Constraints f (m a)) => f (m a) -> m ()
 csequence_ = cfoldr (>>) (return ())
 
--- | The sum of a collection of actions, generalizing 'concat'.
+-- | The sum of a collection of actions, generalizing 'Data.Foldable.concat'.
 --
 -- asum [Just "Hello", Nothing, Just "World"]
 -- Just "Hello"
@@ -307,8 +296,7 @@ casum :: (CFoldable f, Alternative m, Constraints f (m a)) => f (m a) -> m a
 {-# INLINE casum #-}
 casum = cfoldr (<|>) empty
 
--- | The sum of a collection of actions, generalizing 'concat'.
--- As of base 4.8.0.0, 'msum' is just 'asum', specialized to 'MonadPlus'.
+-- | The sum of a collection of actions, generalizing 'Data.Foldable.concat'.
 cmsum :: (CFoldable f, MonadPlus m, Constraints f (m a)) => f (m a) -> m a
 {-# INLINE cmsum #-}
 cmsum = casum
@@ -326,13 +314,13 @@ cconcatMap f xs = build (\c n -> cfoldr (\x b -> cfoldr c b (f x)) n xs)
 
 -- These use foldr rather than cfoldMap to avoid repeated concatenation.
 
--- | 'and' returns the conjunction of a container of Bools.  For the
+-- | 'cand' returns the conjunction of a container of Bools.  For the
 -- result to be 'True', the container must be finite; 'False', however,
 -- results from a 'False' value finitely far from the left end.
 cand :: (CFoldable f, Constraints f Bool) => f Bool -> Bool
 cand = getAll . cfoldMap All
 
--- | 'or' returns the disjunction of a container of Bools.  For the
+-- | 'cor' returns the disjunction of a container of Bools.  For the
 -- result to be 'False', the container must be finite; 'True', however,
 -- results from a 'True' value finitely far from the left end.
 cor :: (CFoldable f, Constraints f Bool) => f Bool -> Bool
@@ -368,11 +356,11 @@ cminimumBy cmp = cfoldl1 min'
      GT -> y
      _  -> x
 
--- | 'notElem' is the negation of 'elem'.
+-- | 'cnotElem' is the negation of 'celem'.
 cnotElem :: (CFoldable f, Eq a, Constraints f a) => a -> f a -> Bool
 cnotElem x = not . celem x
 
--- | The 'find' function takes a predicate and a structure and returns
+-- | The 'cfind' function takes a predicate and a structure and returns
 -- the leftmost element of the structure matching the predicate, or
 -- 'Nothing' if there is no such element.
 cfind :: (CFoldable f, Constraints f a) => (a -> Bool) -> f a -> Maybe a

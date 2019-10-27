@@ -35,11 +35,11 @@ import Data.Constrained (Constrained(..))
 import Data.Foldable.Constrained
 import Data.Functor.Constrained
 
--- | Like 'Functor' but allows elements to have constraints on them.
+-- | Like 'Traversable' but allows elements to have constraints on them.
 -- Laws are the same:
 --
--- > cmap id      == id
--- > cmap (f . g) == cmap f . cmap g
+-- > ctraverse pure == pure
+-- > ctraverse (f <=< g) == ctraverse f <=< ctraverse g
 --
 -- NB There's no aplicative version because Vectors from the
 -- http://hackage.haskell.org/package/vector package only support
@@ -150,6 +150,7 @@ instance (CTraversable f, CTraversable g) => CTraversable (Sum f g) where
   ctraverse f (InR y) = InR <$> ctraverse f y
 
 {-# INLINE cfor #-}
+-- | 'ctraverse' with araguments flipped.
 cfor
   :: (CTraversable f, Constraints f a, Constraints f b, Monad m)
   => f a -> (a -> m b) -> m (f b)
