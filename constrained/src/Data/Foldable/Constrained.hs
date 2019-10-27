@@ -7,6 +7,8 @@
 ----------------------------------------------------------------------------
 
 {-# LANGUAGE BangPatterns        #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies        #-}
 
@@ -40,6 +42,7 @@ import Prelude
 
 import Control.Applicative
 import Control.Monad hiding (mapM_)
+import Data.Coerce
 import Data.Either
 import qualified Data.Foldable as F
 import Data.Functor.Compose (Compose(..))
@@ -49,8 +52,10 @@ import Data.Functor.Sum as Sum
 import Data.List.NonEmpty (NonEmpty(..))
 import Data.Maybe
 import Data.Monoid
+import qualified Data.Monoid as Monoid
 import Data.Ord
 import Data.Semigroup (Max(..), Min(..), Option(..))
+import qualified Data.Semigroup as Semigroup
 import GHC.Base (build)
 
 import Data.Constrained (Constrained(..))
@@ -632,6 +637,383 @@ instance CFoldable (Const a) where
   cminimum = F.minimum
   csum     = F.sum
   cproduct = F.product
+
+instance CFoldable ZipList where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+instance CFoldable Semigroup.Min where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+
+instance CFoldable Semigroup.Max where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+
+instance CFoldable Semigroup.First where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+
+instance CFoldable Semigroup.Last where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+
+instance CFoldable Semigroup.Dual where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+
+instance CFoldable Semigroup.Sum where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+instance CFoldable Semigroup.Product where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold    = F.fold
+  cfoldMap = F.foldMap
+  cfoldr   = F.foldr
+  cfoldr'  = F.foldr'
+  cfoldl   = F.foldl
+  cfoldl'  = F.foldl'
+  cfoldr1  = F.foldr1
+  cfoldl1  = F.foldl1
+  ctoList  = F.toList
+  cnull    = F.null
+  clength  = F.length
+  celem    = F.elem
+  cmaximum = F.maximum
+  cminimum = F.minimum
+  csum     = F.sum
+  cproduct = F.product
+
+instance CFoldable f => CFoldable (Monoid.Ap f) where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold :: forall a. (Monoid a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
+  cfold = coerce (cfold :: f a -> a)
+  cfoldMap :: forall a b. (Monoid b, Constraints (Monoid.Ap f) a) => (a -> b) -> Monoid.Ap f a -> b
+  cfoldMap = coerce (cfoldMap :: (a -> b) -> f a -> b)
+  cfoldr :: forall a b. Constraints (Monoid.Ap f) a => (a -> b -> b) -> b -> Monoid.Ap f a -> b
+  cfoldr = coerce (cfoldr :: (a -> b -> b) -> b -> f a -> b)
+  cfoldr' :: forall a b. Constraints (Monoid.Ap f) a => (a -> b -> b) -> b -> Monoid.Ap f a -> b
+  cfoldr' = coerce (cfoldr' :: (a -> b -> b) -> b -> f a -> b)
+  cfoldl :: forall a b. Constraints (Monoid.Ap f) a => (b -> a -> b) -> b -> Monoid.Ap f a -> b
+  cfoldl = coerce (cfoldl :: (b -> a -> b) -> b -> f a -> b)
+  cfoldl' :: forall a b. Constraints (Monoid.Ap f) a => (b -> a -> b) -> b -> Monoid.Ap f a -> b
+  cfoldl' = coerce (cfoldl' :: (b -> a -> b) -> b -> f a -> b)
+  cfoldr1 :: forall a. Constraints (Monoid.Ap f) a => (a -> a -> a) -> Monoid.Ap f a -> a
+  cfoldr1 = coerce (cfoldr1 :: (a -> a -> a) -> f a -> a)
+  cfoldl1 :: forall a. Constraints (Monoid.Ap f) a => (a -> a -> a) -> Monoid.Ap f a -> a
+  cfoldl1 = coerce (cfoldl1 :: (a -> a -> a) -> f a -> a)
+  ctoList :: forall a. Constraints (Monoid.Ap f) a => Monoid.Ap f a -> [a]
+  ctoList = coerce (ctoList :: f a -> [a])
+  cnull :: forall a. Constraints (Monoid.Ap f) a => Monoid.Ap f a -> Bool
+  cnull = coerce (cnull :: f a -> Bool)
+  clength :: forall a. Constraints (Monoid.Ap f) a => Monoid.Ap f a -> Int
+  clength = coerce (clength :: f a -> Int)
+  celem :: forall a. (Eq a, Constraints (Monoid.Ap f) a) => a -> Monoid.Ap f a -> Bool
+  celem = coerce (celem :: a -> f a -> Bool)
+  cmaximum :: forall a. (Ord a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
+  cmaximum = coerce (cmaximum :: f a -> a)
+  cminimum :: forall a. (Ord a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
+  cminimum = coerce (cminimum :: f a -> a)
+  csum :: forall a. (Num a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
+  csum = coerce (csum :: f a -> a)
+  cproduct :: forall a. (Num a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
+  cproduct = coerce (cproduct :: f a -> a)
+
+instance CFoldable f => CFoldable (Monoid.Alt f) where
+  {-# INLINE cfold    #-}
+  {-# INLINE cfoldMap #-}
+  {-# INLINE cfoldr   #-}
+  {-# INLINE cfoldr'  #-}
+  {-# INLINE cfoldl   #-}
+  {-# INLINE cfoldl'  #-}
+  {-# INLINE cfoldr1  #-}
+  {-# INLINE cfoldl1  #-}
+  {-# INLINE ctoList  #-}
+  {-# INLINE cnull    #-}
+  {-# INLINE clength  #-}
+  {-# INLINE celem    #-}
+  {-# INLINE cmaximum #-}
+  {-# INLINE cminimum #-}
+  {-# INLINE csum     #-}
+  {-# INLINE cproduct #-}
+  cfold :: forall a. (Monoid a, Constraints (Monoid.Alt f) a) => Monoid.Alt f a -> a
+  cfold = coerce (cfold :: f a -> a)
+  cfoldMap :: forall a b. (Monoid b, Constraints (Monoid.Alt f) a) => (a -> b) -> Monoid.Alt f a -> b
+  cfoldMap = coerce (cfoldMap :: (a -> b) -> f a -> b)
+  cfoldr :: forall a b. Constraints (Monoid.Alt f) a => (a -> b -> b) -> b -> Monoid.Alt f a -> b
+  cfoldr = coerce (cfoldr :: (a -> b -> b) -> b -> f a -> b)
+  cfoldr' :: forall a b. Constraints (Monoid.Alt f) a => (a -> b -> b) -> b -> Monoid.Alt f a -> b
+  cfoldr' = coerce (cfoldr' :: (a -> b -> b) -> b -> f a -> b)
+  cfoldl :: forall a b. Constraints (Monoid.Alt f) a => (b -> a -> b) -> b -> Monoid.Alt f a -> b
+  cfoldl = coerce (cfoldl :: (b -> a -> b) -> b -> f a -> b)
+  cfoldl' :: forall a b. Constraints (Monoid.Alt f) a => (b -> a -> b) -> b -> Monoid.Alt f a -> b
+  cfoldl' = coerce (cfoldl' :: (b -> a -> b) -> b -> f a -> b)
+  cfoldr1 :: forall a. Constraints (Monoid.Alt f) a => (a -> a -> a) -> Monoid.Alt f a -> a
+  cfoldr1 = coerce (cfoldr1 :: (a -> a -> a) -> f a -> a)
+  cfoldl1 :: forall a. Constraints (Monoid.Alt f) a => (a -> a -> a) -> Monoid.Alt f a -> a
+  cfoldl1 = coerce (cfoldl1 :: (a -> a -> a) -> f a -> a)
+  ctoList :: forall a. Constraints (Monoid.Alt f) a => Monoid.Alt f a -> [a]
+  ctoList = coerce (ctoList :: f a -> [a])
+  cnull :: forall a. Constraints (Monoid.Alt f) a => Monoid.Alt f a -> Bool
+  cnull = coerce (cnull :: f a -> Bool)
+  clength :: forall a. Constraints (Monoid.Alt f) a => Monoid.Alt f a -> Int
+  clength = coerce (clength :: f a -> Int)
+  celem :: forall a. (Eq a, Constraints (Monoid.Alt f) a) => a -> Monoid.Alt f a -> Bool
+  celem = coerce (celem :: a -> f a -> Bool)
+  cmaximum :: forall a. (Ord a, Constraints (Monoid.Alt f) a) => Monoid.Alt f a -> a
+  cmaximum = coerce (cmaximum :: f a -> a)
+  cminimum :: forall a. (Ord a, Constraints (Monoid.Alt f) a) => Monoid.Alt f a -> a
+  cminimum = coerce (cminimum :: f a -> a)
+  csum :: forall a. (Num a, Constraints (Monoid.Alt f) a) => Monoid.Alt f a -> a
+  csum = coerce (csum :: f a -> a)
+  cproduct :: forall a. (Num a, Constraints (Monoid.Alt f) a) => Monoid.Alt f a -> a
+  cproduct = coerce (cproduct :: f a -> a)
 
 instance (CFoldable f, CFoldable g) => CFoldable (Compose f g) where
   {-# INLINABLE cfold    #-}

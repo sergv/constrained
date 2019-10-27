@@ -19,6 +19,7 @@ module Data.Constrained
   , NoConstraints
   ) where
 
+import Control.Applicative (ZipList(..))
 import Data.Functor.Compose (Compose(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
@@ -26,6 +27,8 @@ import Data.Functor.Product (Product(..))
 import Data.Functor.Sum (Sum(..))
 import Data.Kind
 import Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 
 -- | NB 'Constraints' is associated with a typeclass in order to
 -- improve inference. Whenever a typeclass constraint will be present, instance
@@ -64,6 +67,36 @@ instance Constrained (Either a) where
 
 instance Constrained (Const a) where
   type Constraints (Const a) = NoConstraints
+
+instance Constrained ZipList where
+  type Constraints ZipList = NoConstraints
+
+instance Constrained Semigroup.Min where
+  type Constraints Semigroup.Min = NoConstraints
+
+instance Constrained Semigroup.Max where
+  type Constraints Semigroup.Max = NoConstraints
+
+instance Constrained Semigroup.First where
+  type Constraints Semigroup.First = NoConstraints
+
+instance Constrained Semigroup.Last where
+  type Constraints Semigroup.Last = NoConstraints
+
+instance Constrained Semigroup.Dual where
+  type Constraints Semigroup.Dual = NoConstraints
+
+instance Constrained Semigroup.Sum where
+  type Constraints Semigroup.Sum = NoConstraints
+
+instance Constrained Semigroup.Product where
+  type Constraints Semigroup.Product = NoConstraints
+
+instance Constrained f => Constrained (Monoid.Ap f) where
+  type Constraints (Monoid.Ap f) = Constraints f
+
+instance Constrained f => Constrained (Monoid.Alt f) where
+  type Constraints (Monoid.Alt f) = Constraints f
 
 instance (Constrained f, Constrained g) => Constrained (Compose f g) where
   type Constraints (Compose f g) = ComposeConstraints f g

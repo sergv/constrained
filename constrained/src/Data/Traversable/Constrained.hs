@@ -20,12 +20,15 @@ module Data.Traversable.Constrained
   , module Data.Constrained
   ) where
 
+import Control.Applicative (ZipList(..))
 import Data.Functor.Compose (Compose(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Functor.Product as Product
 import Data.Functor.Sum (Sum(..))
 import Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 
 import Data.Constrained (Constrained(..))
 import Data.Foldable.Constrained
@@ -85,6 +88,50 @@ instance CTraversable (Either a) where
 instance CTraversable (Const a) where
   {-# INLINE csequence #-}
   csequence = sequenceA
+
+instance CTraversable ZipList where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Min where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Max where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.First where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Last where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Dual where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Sum where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable Semigroup.Product where
+  {-# INLINE csequence #-}
+  csequence = sequenceA
+
+instance CTraversable f => CTraversable (Monoid.Ap f) where
+  {-# INLINE ctraverse #-}
+  {-# INLINE csequence #-}
+  ctraverse f = fmap Monoid.Ap . ctraverse f . Monoid.getAp
+  csequence = fmap Monoid.Ap . csequence . Monoid.getAp
+
+instance CTraversable f => CTraversable (Monoid.Alt f) where
+  {-# INLINE ctraverse #-}
+  {-# INLINE csequence #-}
+  ctraverse f = fmap Monoid.Alt . ctraverse f . Monoid.getAlt
+  csequence = fmap Monoid.Alt . csequence . Monoid.getAlt
 
 instance (CTraversable f, CTraversable g) => CTraversable (Compose f g) where
   {-# INLINABLE ctraverse #-}

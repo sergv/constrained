@@ -6,20 +6,26 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE DefaultSignatures   #-}
+{-# LANGUAGE InstanceSigs        #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 module Data.Functor.Constrained
   ( CFunctor(..)
   , module Data.Constrained
   ) where
 
+import Control.Applicative (ZipList(..))
+import Data.Coerce
 import Data.Functor.Compose (Compose(..))
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Functor.Product (Product(..))
 import Data.Functor.Sum (Sum(..))
 import Data.List.NonEmpty (NonEmpty(..))
+import qualified Data.Monoid as Monoid
+import qualified Data.Semigroup as Semigroup
 
 import Data.Constrained (Constrained(..), NoConstraints)
 
@@ -70,6 +76,66 @@ instance CFunctor (Either a) where
 instance CFunctor (Const a) where
   {-# INLINE cmap_ #-}
   cmap_ = (<$)
+
+instance CFunctor ZipList where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Min where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Max where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.First where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Last where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Dual where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Sum where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor Semigroup.Product where
+  {-# INLINE cmap_ #-}
+  cmap_ = (<$)
+
+instance CFunctor f => CFunctor (Monoid.Ap f) where
+  {-# INLINE cmap #-}
+  {-# INLINE cmap_ #-}
+  cmap
+    :: forall a b. (Constraints (Monoid.Ap f) a, Constraints (Monoid.Ap f) b)
+    => (a -> b) -> Monoid.Ap f a -> Monoid.Ap f b
+  cmap = coerce (cmap :: (a -> b) -> f a -> f b)
+
+  cmap_
+    :: forall a b. (Constraints (Monoid.Ap f) a, Constraints (Monoid.Ap f) b)
+    => a -> Monoid.Ap f b -> Monoid.Ap f a
+  cmap_ = coerce (cmap_ :: a -> f b -> f a)
+
+instance CFunctor f => CFunctor (Monoid.Alt f) where
+  {-# INLINE cmap #-}
+  {-# INLINE cmap_ #-}
+  cmap
+    :: forall a b. (Constraints (Monoid.Alt f) a, Constraints (Monoid.Alt f) b)
+    => (a -> b) -> Monoid.Alt f a -> Monoid.Alt f b
+  cmap = coerce (cmap :: (a -> b) -> f a -> f b)
+
+  cmap_
+    :: forall a b. (Constraints (Monoid.Alt f) a, Constraints (Monoid.Alt f) b)
+    => a -> Monoid.Alt f b -> Monoid.Alt f a
+  cmap_ = coerce (cmap_ :: a -> f b -> f
+   a)
+
 
 instance (CFunctor f, CFunctor g) => CFunctor (Compose f g) where
   {-# INLINE cmap #-}
