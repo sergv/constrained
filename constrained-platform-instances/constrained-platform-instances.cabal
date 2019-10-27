@@ -20,6 +20,10 @@ maintainer:
 tested-with:
   GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.1
 category: Data
+homepage:
+  https://github.com/sergv/constrained
+bug-reports:
+  https://github.com/sergv/constrained/issues
 
 build-type:
   Simple
