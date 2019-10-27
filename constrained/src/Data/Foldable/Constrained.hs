@@ -7,6 +7,7 @@
 ----------------------------------------------------------------------------
 
 {-# LANGUAGE BangPatterns        #-}
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE InstanceSigs        #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -915,6 +916,7 @@ instance CFoldable Semigroup.Product where
   csum     = F.sum
   cproduct = F.product
 
+#if MIN_VERSION_base(4,12,0)
 instance CFoldable f => CFoldable (Monoid.Ap f) where
   {-# INLINE cfold    #-}
   {-# INLINE cfoldMap #-}
@@ -964,6 +966,7 @@ instance CFoldable f => CFoldable (Monoid.Ap f) where
   csum = coerce (csum :: f a -> a)
   cproduct :: forall a. (Num a, Constraints (Monoid.Ap f) a) => Monoid.Ap f a -> a
   cproduct = coerce (cproduct :: f a -> a)
+#endif
 
 instance CFoldable f => CFoldable (Monoid.Alt f) where
   {-# INLINE cfold    #-}

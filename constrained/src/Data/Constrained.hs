@@ -6,6 +6,7 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
+{-# LANGUAGE CPP                     #-}
 {-# LANGUAGE ConstraintKinds         #-}
 {-# LANGUAGE FlexibleInstances       #-}
 {-# LANGUAGE MultiParamTypeClasses   #-}
@@ -92,8 +93,10 @@ instance Constrained Semigroup.Sum where
 instance Constrained Semigroup.Product where
   type Constraints Semigroup.Product = NoConstraints
 
+#if MIN_VERSION_base(4,12,0)
 instance Constrained f => Constrained (Monoid.Ap f) where
   type Constraints (Monoid.Ap f) = Constraints f
+#endif
 
 instance Constrained f => Constrained (Monoid.Alt f) where
   type Constraints (Monoid.Alt f) = Constraints f

@@ -6,6 +6,7 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
+{-# LANGUAGE CPP                 #-}
 {-# LANGUAGE DefaultSignatures   #-}
 {-# LANGUAGE InstanceSigs        #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -109,6 +110,7 @@ instance CFunctor Semigroup.Product where
   {-# INLINE cmap_ #-}
   cmap_ = (<$)
 
+#if MIN_VERSION_base(4,12,0)
 instance CFunctor f => CFunctor (Monoid.Ap f) where
   {-# INLINE cmap #-}
   {-# INLINE cmap_ #-}
@@ -121,6 +123,7 @@ instance CFunctor f => CFunctor (Monoid.Ap f) where
     :: forall a b. (Constraints (Monoid.Ap f) a, Constraints (Monoid.Ap f) b)
     => a -> Monoid.Ap f b -> Monoid.Ap f a
   cmap_ = coerce (cmap_ :: a -> f b -> f a)
+#endif
 
 instance CFunctor f => CFunctor (Monoid.Alt f) where
   {-# INLINE cmap #-}

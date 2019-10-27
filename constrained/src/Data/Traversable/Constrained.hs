@@ -6,6 +6,7 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
+{-# LANGUAGE CPP                  #-}
 {-# LANGUAGE ConstraintKinds      #-}
 {-# LANGUAGE DefaultSignatures    #-}
 {-# LANGUAGE FlexibleContexts     #-}
@@ -121,11 +122,13 @@ instance CTraversable Semigroup.Product where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
+#if MIN_VERSION_base(4,12,0)
 instance CTraversable f => CTraversable (Monoid.Ap f) where
   {-# INLINE ctraverse #-}
   {-# INLINE csequence #-}
   ctraverse f = fmap Monoid.Ap . ctraverse f . Monoid.getAp
   csequence = fmap Monoid.Ap . csequence . Monoid.getAp
+#endif
 
 instance CTraversable f => CTraversable (Monoid.Alt f) where
   {-# INLINE ctraverse #-}
