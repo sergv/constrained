@@ -6,15 +6,13 @@
 -- Maintainer  :  sergey@debian
 ----------------------------------------------------------------------------
 
-{-# LANGUAGE ConstraintKinds        #-}
-{-# LANGUAGE DefaultSignatures      #-}
-{-# LANGUAGE FlexibleContexts       #-}
-{-# LANGUAGE FlexibleInstances      #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE KindSignatures         #-}
-{-# LANGUAGE MultiParamTypeClasses  #-}
-{-# LANGUAGE TypeFamilies           #-}
-{-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE DefaultSignatures    #-}
+{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE KindSignatures       #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Data.Traversable.Constrained
   ( CTraversable(..)
@@ -27,7 +25,6 @@ import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Data.Functor.Product as Product
 import Data.Functor.Sum (Sum(..))
-import Data.Kind
 import Data.List.NonEmpty (NonEmpty(..))
 
 import Data.Constrained (Constrained(..))
@@ -40,74 +37,70 @@ import Data.Functor.Constrained
 -- > cmap id      == id
 -- > cmap (f . g) == cmap f . cmap g
 --
--- Parameter 'c' provides constraints on the \'applicative function\'
--- that can be used to perform the traversal. Typical values for it are
--- 'Applicative' and 'Monad'.
---
--- E.g. standard 'Traversable' is recovered when 'c' is 'Applicative'.
--- Vectors from the http://hackage.haskell.org/package/vector package
--- only support monadic traversals, so for them it's 'Monad'. Other
--- values for 'c' are definitely possible too.
-class (CFunctor f, CFoldable f) => CTraversable (c :: (Type -> Type) -> Constraint) (f :: Type -> Type) | f -> c where
+-- NB There's no aplicative version because Vectors from the
+-- http://hackage.haskell.org/package/vector package only support
+-- monadic traversals. Since they're one of the main motivation for
+-- this package, 'Applicative' version of traversals will not exist.
+class (CFunctor f, CFoldable f) => CTraversable f where
   ctraverse
-    :: (Constraints f a, Constraints f b, c m)
+    :: (Constraints f a, Constraints f b, Monad m)
     => (a -> m b) -> f a -> m (f b)
 
   {-# INLINE csequence #-}
   csequence
-    :: (Constraints f a, Constraints f (m a), c m)
+    :: (Constraints f a, Constraints f (m a), Monad m)
     => f (m a) -> m (f a)
   csequence = ctraverse id
 
   {-# INLINE ctraverse #-}
   default ctraverse
-    :: (Constraints f a, Constraints f b, c ~ Applicative, c m, Traversable f)
+    :: (Constraints f a, Constraints f b, Monad m, Traversable f)
     => (a -> m b) -> f a -> m (f b)
   ctraverse = traverse
 
-instance CTraversable Applicative [] where
+instance CTraversable [] where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative NonEmpty where
+instance CTraversable NonEmpty where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative Identity where
+instance CTraversable Identity where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative ((,) a) where
+instance CTraversable ((,) a) where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative Maybe where
+instance CTraversable Maybe where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative (Either a) where
+instance CTraversable (Either a) where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative (Const a) where
+instance CTraversable (Const a) where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Compose f g) where
+instance (CTraversable f, CTraversable g) => CTraversable (Compose f g) where
   {-# INLINABLE ctraverse #-}
   ctraverse f = fmap Compose . ctraverse (ctraverse f) . getCompose
 
-instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Product f g) where
+instance (CTraversable f, CTraversable g) => CTraversable (Product f g) where
   {-# INLINABLE ctraverse #-}
   ctraverse f (Pair x y) = Pair <$> ctraverse f x <*> ctraverse f y
 
-instance (CTraversable Applicative f, CTraversable Applicative g) => CTraversable Applicative (Sum f g) where
+instance (CTraversable f, CTraversable g) => CTraversable (Sum f g) where
   {-# INLINABLE ctraverse #-}
   ctraverse f (InL x) = InL <$> ctraverse f x
   ctraverse f (InR y) = InR <$> ctraverse f y
 
 {-# INLINE cfor #-}
 cfor
-  :: (CTraversable c f, Constraints f a, Constraints f b, c m)
+  :: (CTraversable f, Constraints f a, Constraints f b, Monad m)
   => f a -> (a -> m b) -> m (f b)
 cfor = flip ctraverse

@@ -30,33 +30,33 @@ import Data.Foldable.Constrained.Instances ()
 import Data.Functor.Constrained.Instances ()
 import Data.Traversable.Constrained
 
-instance A.Ix i => CTraversable Applicative (A.Array i) where
+instance A.Ix i => CTraversable (A.Array i) where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative IntMap where
+instance CTraversable IntMap where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative (Map k) where
+instance CTraversable (Map k) where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Applicative Set where
+instance CTraversable Set where
   ctraverse f = S.foldr (\x rest -> S.insert <$> f x <*> rest) (pure S.empty)
 
-instance CTraversable Applicative V.Vector where
+instance CTraversable V.Vector where
   {-# INLINE csequence #-}
   csequence = sequenceA
 
-instance CTraversable Monad VP.Vector where
+instance CTraversable VP.Vector where
   {-# INLINE ctraverse #-}
   ctraverse = VP.mapM
 
-instance CTraversable Monad VS.Vector where
+instance CTraversable VS.Vector where
   {-# INLINE ctraverse #-}
   ctraverse = VS.mapM
 
-instance CTraversable Monad VU.Vector where
+instance CTraversable VU.Vector where
   {-# INLINE ctraverse #-}
   ctraverse = VU.mapM
