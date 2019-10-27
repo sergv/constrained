@@ -7,7 +7,8 @@ version:
 synopsis:
   Instances of standard platform types for 'constrained' package.
 description:
-  Instances for 'IntMap', 'Map', 'Vector', etc.
+  Instances for 'IntMap', 'Map', 'Set', 'Vector', etc of genealizations of
+  standard 'Functor', 'Foldable', and 'Traversable' classes.
 license:
   BSD2
 license-file:
@@ -15,9 +16,10 @@ license-file:
 author:
   Sergey Vinokurov
 maintainer:
-  Sergey Vinokurov <sergey@debian>
+  Sergey Vinokurov <serg.foo@gmail.com>
 tested-with:
   GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.1
+category: Data
 
 build-type:
   Simple
@@ -33,7 +35,7 @@ library
   build-depends:
     array,
     -- 7.4.1 instroduced ConstraintKind
-    base >= 4.5,
+    base >= 4.5 && < 5,
     constrained,
     containers,
     vector
@@ -57,5 +59,3 @@ library
       -Wcpp-undef
       -Wmissing-home-modules
       -Wunbanged-strict-patterns
-  ghc-prof-options:
-    -fprof-auto

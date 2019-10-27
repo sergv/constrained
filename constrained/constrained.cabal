@@ -5,7 +5,7 @@ name:
 version:
   0.1
 synopsis:
-  Generalization of standard Functor, Foldable and Traversable classes to accomodate types like unboxed vectors.
+  Generalization of standard Functor, Foldable, and Traversable classes
 description:
   This package generalizes familiar 'Functor', 'Foldable' and 'Traversable'
   for the case when a functorial type of kind Type -> Type imposes certain constraints
@@ -20,9 +20,10 @@ license-file:
 author:
   Sergey Vinokurov
 maintainer:
-  Sergey Vinokurov <sergey@debian>
+  Sergey Vinokurov <serg.foo@gmail.com>
 tested-with:
   GHC == 8.2.2, GHC == 8.4.4, GHC == 8.6.5, GHC == 8.8.1
+category: Data
 
 build-type:
   Simple
@@ -39,7 +40,7 @@ library
     -- -- 7.4.1 instroduced ConstraintKind - base 4.5
     -- base >= 4.5
     -- 4.8 introduced extra functions in Foldable
-    base >= 4.8
+    base >= 4.8 && < 5
   default-language:
     Haskell2010
   ghc-options:
@@ -60,5 +61,3 @@ library
       -Wcpp-undef
       -Wmissing-home-modules
       -Wunbanged-strict-patterns
-  ghc-prof-options:
-    -fprof-auto
